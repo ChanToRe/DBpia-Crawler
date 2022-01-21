@@ -111,7 +111,7 @@ for i in range(target_page):
         abstractL.append(abstract)
     print("[{}/{}]".format(iCount, target_page*len(items)))
 
-    try : driver.find_elements_by_xpath("//*[@id='pcPaging2']/a").click()
+    try : driver.find_elements_by_xpath(f"//*[@id='pcPaging{i+1}']/a").click()
     except : break
 
 print("====Done!====")
