@@ -13,11 +13,11 @@ import datetime
 import time
 from time import sleep
 
-keyword = "고고학"
-page = 1
+keyword = "고고학" #검색어
+target_page = 2 #원하는 페이지
 url = "https://www.dbpia.co.kr/"
 
-driver = webdriver.Chrome('/usr/local/bin/chromedriver')
+driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver 주소
 driver.get(url)
 
 search_box = driver.find_element_by_xpath('//*[@id="keyword"]')
@@ -43,7 +43,6 @@ soup = BeautifulSoup(items_source, 'html.parser')
 
 items = soup.find('div','searchListArea').find('div','listBody').find('ul').find_all('li', 'item')
 
-# 제목, 저자, 학회, 학보, 볼륨, 발표일, 초록
 titleL = []
 authorL = []
 publisherL = []
@@ -52,67 +51,70 @@ volumeL = []
 dateL = []
 abstractL = []
 tLen = len(items)
-print("start parsing")
 
-iCount = 0
-for item in items :
-    iCount += 1
-    if iCount % 20 == 0:
-        print(" parsing.. [{}/{}]".format(iCount, tLen))
+print("====start====")
 
-    title = ''
-    try : title = item.find('div','titWrap').find('a').text
-    except : title = ''
-    titleL.append(title)
+for i in range(target_page):
+    iCount = 0
+    for item in items :
+        iCount += 1
 
-    author = ''
-    try : author = item.find('li','author').text
-    except : author = ''
-    authorL.append(author)
+        title = ''
+        try : title = item.find('div','titWrap').find('a').text
+        except : title = ''
+        titleL.append(title)
 
-    publisher = ''
-    try : publisher = item.find('li','publisher').text
-    except : publisher = ''
-    publisherL.append(publisher)
+        author = ''
+        try : author = item.find('li','author').text
+        except : author = ''
+        authorL.append(author)
 
-    journal = ''
-    try : journal = item.find('li','journal').text
-    except : journal = ''
-    journalL.append(journal)
+        publisher = ''
+        try : publisher = item.find('li','publisher').text
+        except : publisher = ''
+        publisherL.append(publisher)
 
-    volume = ''
-    try : volume = item.find('li','volume').text
-    except : volume = ''
-    volumeL.append(volume)
+        journal = ''
+        try : journal = item.find('li','journal').text
+        except : journal = ''
+        journalL.append(journal)
 
-    date = ''
-    try : date = item.find('li','date').text
-    except : date = ''
-    dateL.append(date)
+        volume = ''
+        try : volume = item.find('li','volume').text
+        except : volume = ''
+        volumeL.append(volume)
 
-    abstract = ''
-    pUrl = ''
-    try : pUrl = item.find('div','titWrap').find('a')['href']
-    except : pUrl = ''
-    if (pUrl != ''):
-        pUrl = url + pUrl
-        driver.get(pUrl)
-        try : driver.find_element_by_xpath('//*[@id="#pub_modalOrganPop"]').click()
-        except : pass
-        time.sleep(0.1)
-        try : driver.find_element_by_xpath('//*[@id="#pub_modalLoginPop"]').click()
-        except : pass
-        
-#여기 아래 부분이 문제인듯 씨발
-        try :
-            driver.find_element_by_xpath('//*[@id="pub_abstract"]/div[2]/div/div[1]/div[2]/a').click()
-            eachPage = driver.page_source
-            ePsoup = BeautifulSoup(eachPage, 'html.parser')
-            abstract = ePsoup.find('div','abstFull').find('p','article').text
-        except : abstract = ''
-    abstractL.append(abstract)
+        date = ''
+        try : date = item.find('li','date').text
+        except : date = ''
+        dateL.append(date)
 
-print("date to .csv file")
+        abstract = ''
+        pUrl = ''
+        try : pUrl = item.find('div','titWrap').find('a')['href']
+        except : pUrl = ''
+        if (pUrl != ''):
+            pUrl = url + pUrl
+            driver.get(pUrl)
+            try : driver.find_element_by_xpath('//*[@id="#pub_modalOrganPop"]').click()
+            except : pass
+            time.sleep(0.1)
+            try : driver.find_element_by_xpath('//*[@id="#pub_modalLoginPop"]').click()
+            except : pass
+#이 아래가 문제인 듯
+            try :
+                driver.find_element_by_xpath('//*[@id="pub_abstract"]/div[2]/div/div[1]/div[2]/a').click()
+                eachPage = driver.page_source
+                ePsoup = BeautifulSoup(eachPage, 'html.parser')
+                abstract = ePsoup.find('div','abstFull').find('p','article').text
+            except : abstract = ''
+        abstractL.append(abstract)
+    print("[{}/{}]".format(iCount, target_page*len(items)))
+
+    try : driver.find_elements_by_xpath("//*[@id='pcPaging2']/a").click()
+    except : break
+
+print("====Done!====")
 
 resultDict = dict(title = titleL,
               author = authorL,
