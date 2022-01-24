@@ -1,4 +1,3 @@
-import selenium
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,41 +6,20 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import pandas as pd
-import re
-import csv
-import datetime
 import time
-from time import sleep
 
+#하단에 입력해주세요.
+savename = "DBpia-Crawler" #저장 파일명
 keyword = "고고학" #검색어
-target_page = 2 #원하는 페이지
-url = "https://www.dbpia.co.kr/"
+target_page = 3 #원하는 페이지
 
+url = "https://www.dbpia.co.kr/"
 driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver 주소
 driver.get(url)
-
 search_box = driver.find_element_by_xpath('//*[@id="keyword"]')
 search_box_btn = driver.find_element_by_xpath('//*[@id="bnHead"]/div[3]/div/div[1]/div[1]/a')
 search_box.send_keys(keyword)
 search_box_btn.click()
-
-wCount = 0
-while(True):
-    time.sleep(1)
-    try:
-        more = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='contents']/div[2]/div[3]/div[3]/div[3]/div/a")))
-        driver.execute_script("arguments[0].click()",more)
-    except:
-        print('retry')
-        break
-    wCount += 1
-    print(" + page [{}]".format(wCount))
-
-
-items_source = driver.page_source
-soup = BeautifulSoup(items_source, 'html.parser')
-
-items = soup.find('div','searchListArea').find('div','listBody').find('ul').find_all('li', 'item')
 
 titleL = []
 authorL = []
@@ -50,12 +28,17 @@ journalL = []
 volumeL = []
 dateL = []
 abstractL = []
-tLen = len(items)
 
 print("====start====")
 
-for i in range(target_page):
-    iCount = 0
+iCount = 0
+i = 1
+
+while i <= target_page:
+    items_source = driver.page_source
+    soup = BeautifulSoup(items_source, 'html.parser')
+    items = soup.find('div','searchListArea').find('div','listBody').find('ul').find_all('li', 'item')
+
     for item in items :
         iCount += 1
 
@@ -101,7 +84,6 @@ for i in range(target_page):
             time.sleep(0.1)
             try : driver.find_element_by_xpath('//*[@id="#pub_modalLoginPop"]').click()
             except : pass
-#이 아래가 문제인 듯
             try :
                 driver.find_element_by_xpath('//*[@id="pub_abstract"]/div[2]/div/div[1]/div[2]/a').click()
                 eachPage = driver.page_source
@@ -109,23 +91,34 @@ for i in range(target_page):
                 abstract = ePsoup.find('div','abstFull').find('p','article').text
             except : abstract = ''
         abstractL.append(abstract)
-    print("[{}/{}]".format(iCount, target_page*len(items)))
 
-    try : driver.find_elements_by_xpath(f"//*[@id='pcPaging{i+1}']/a").click()
+#Next Page
+    try :
+        driver.get(url)
+        search_box = driver.find_element_by_xpath('//*[@id="keyword"]')
+        search_box_btn = driver.find_element_by_xpath('//*[@id="bnHead"]/div[3]/div/div[1]/div[1]/a')
+        search_box.send_keys(keyword)
+        search_box_btn.click()
+        time.sleep(2)
+        nxt = driver.find_element_by_xpath(f"/html/body/div[3]/div[2]/div[1]/div[2]/div[2]/div[3]/div[3]/a[{i+1}]")
+        nxt.click()
+        print(i, "page Done")
+        i += 1
+        time.sleep(2)
     except : break
 
 print("====Done!====")
 
 resultDict = dict(title = titleL,
-              author = authorL,
-              publisher = publisherL,
-              journal = journalL,
-              volume = volumeL,
-              date = dateL,
-              abstract = abstractL)
+                author = authorL,
+                publisher = publisherL,
+                journal = journalL,
+                volume = volumeL,
+                date = dateL,
+                abstract = abstractL)
 
-csv_Name = "~/Desktop/{}.csv".format(keyword)
-xlsx_Name = "~/Desktop/{}.xlsx".format(keyword)
+csv_Name = "~/Desktop/{}.csv".format(savename)
+xlsx_Name = "~/Desktop/{}.xlsx".format(savename)
 DB = pd.DataFrame(resultDict)
 DB.to_csv(csv_Name)
 DB.to_excel(xlsx_Name)
