@@ -12,10 +12,10 @@ import time
 savename = "DBpia-Crawler" #저장 파일명
 keyword = "고고학" #검색어
 target_page = 187 #원하는 페이지
+driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver 주소
 
 #접속 및 세팅
 url = "https://www.dbpia.co.kr/"
-driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver 주소
 driver.get(url)
 driver.find_element_by_xpath('//*[@id="keyword"]').send_keys(keyword)
 driver.find_element_by_xpath('//*[@id="bnHead"]/div[3]/div/div[1]/div[1]/a').click()
