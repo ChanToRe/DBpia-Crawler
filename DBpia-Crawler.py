@@ -8,19 +8,19 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 
-#하단에 입력해주세요.
-savename = "DBpia-Crawler" #저장 파일명
-keyword = "고고학" #검색어
-target_page = 187 #원하는 페이지
-driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver 주소
+#Input
+savename = "DBpia-Crawler" #File name
+keyword = "고고학" #Search keyword
+target_page = 3 #Page
+driver = webdriver.Chrome('/usr/local/bin/chromedriver') #Chromedriver path
 
-#접속 및 세팅
+#Chromedriver setting
 url = "https://www.dbpia.co.kr/"
 driver.get(url)
 driver.find_element_by_xpath('//*[@id="keyword"]').send_keys(keyword)
 driver.find_element_by_xpath('//*[@id="bnHead"]/div[3]/div/div[1]/div[1]/a').click()
 
-#저장 리스트
+#Save list
 titleL = []
 authorL = []
 publisherL = []
@@ -30,7 +30,7 @@ dateL = []
 
 print("====start====")
 
-#크롤링
+#Crawling
 for i in range(target_page):
 
     items_source = driver.page_source
@@ -40,43 +40,43 @@ for i in range(target_page):
 
     for item in items :
 
-        #제목
+        #title
         title = ''
         try : title = item.find('div','titWrap').find('a').text
         except : title = ''
         titleL.append(title)
 
-        #저자
+        #author
         author = ''
         try : author = item.find('li','author').text
         except : author = ''
         authorL.append(author)
 
-        #발간기관
+        #publisher
         publisher = ''
         try : publisher = item.find('li','publisher').text
         except : publisher = ''
         publisherL.append(publisher)
 
-        #발간지
+        #journal
         journal = ''
         try : journal = item.find('li','journal').text
         except : journal = ''
         journalL.append(journal)
 
-        #회차
+        #volume
         volume = ''
         try : volume = item.find('li','volume').text
         except : volume = ''
         volumeL.append(volume)
 
-        #발간일
+        #date
         date = ''
         try : date = item.find('li','date').text
         except : date = ''
         dateL.append(date)
-
-    #다음 페이지 클릭
+        
+    #Next page
     try:
         driver.find_element_by_xpath(f'//*[@id="pcPaging{str(i+1)}"]').click()
         time.sleep(2)
@@ -86,19 +86,19 @@ for i in range(target_page):
     i += 1
     time.sleep(2)
     
-    #10페이지 마다 Next 버튼 클릭
+    #Next button
     if i % 10 == 0:
         driver.find_element_by_xpath('//*[@id="next"]').click()
 
 print("====Done!====")
 
-#저장
+#Save
 resultDict = dict(title = titleL,
                 author = authorL,
                 publisher = publisherL,
                 journal = journalL,
                 volume = volumeL,
-                date = dateL,)
+                date = dateL)
 
 csv_Name = "~/Desktop/{}.csv".format(savename)
 xlsx_Name = "~/Desktop/{}.xlsx".format(savename)
