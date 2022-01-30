@@ -12,10 +12,14 @@
  * 추후 초록 크롤링 기능을 추가할 것
 
 ### 설치
+```python
+git clone https://github.com/ChanToRe/DBpia-Crawler.git
+```
 ```python3
 pip install pandas
 pip install selenium
 pip install BeautifulSoup
+pip install tqdm
 ```
 
 ### 사용법
