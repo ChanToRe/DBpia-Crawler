@@ -12,7 +12,7 @@
  * 추후 초록 크롤링 기능을 추가할 것
 
 ### 설치
-```python
+```bash
 git clone https://github.com/ChanToRe/DBpia-Crawler.git
 ```
 ```python3
