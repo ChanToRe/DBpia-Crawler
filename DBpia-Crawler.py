@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import pandas as pd
+from tqdm import tqdm
 import time
 
 #Input
@@ -31,7 +32,7 @@ dateL = []
 print("====start====")
 
 #Crawling
-for i in range(target_page):
+for i in tqdm(range(target_page)):
 
     items_source = driver.page_source
     soup = BeautifulSoup(items_source, 'html.parser')
@@ -82,7 +83,6 @@ for i in range(target_page):
         time.sleep(2)
     except:
         pass
-    print(i, "Done")
     i += 1
     time.sleep(2)
     
